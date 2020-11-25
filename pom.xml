@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>textextraction</groupId>
@@ -13,24 +14,7 @@
     <maven.compiler.target>11</maven.compiler.target>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.build.localRepo>${project.build.directory}/mvn-repo</project.build.localRepo>
-
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
-    <!-- 
-      The id of the server to use on authenticating against the Github server. This id must
-      correspond to a respective <server>-entry in your ~/.m2/settings.xml specifiying the 
-      credentials to use on authenticating. 
-    -->
-    <github.global.server>github</github.global.server>
-    <!-- The branch to which the artifacts should be uploaded. -->
-    <github.site.branch>refs/heads/mvn-repo</github.site.branch>
-    <!-- The commit message to use on committing the artifacts. -->
-    <github.site.message>Maven artifacts for ${project.version}</github.site.message>
-    <!-- The Github account name owning the repository to which the artifacts should be uploaded -->
-    <github.site.repositoryOwner>text-extraction</github.site.repositoryOwner>
-    <!-- The name of the repository to which the artifacts should be uploaded. -->
-    <github.site.repositoryName>${project.artifactId}</github.site.repositoryName>
   </properties>
 
   <repositories>
@@ -81,51 +65,9 @@
     </dependency>
   </dependencies>
 
-  <!-- Deploy the artifacts to a tmp staging repository before uploading to the Github repo. -->
-  <distributionManagement>
-    <repository>
-      <id>repo</id>
-      <name>Temporary Staging Repository</name>
-      <url>file://${project.build.localRepo}</url>
-    </repository>
-  </distributionManagement>
-
   <build>
     <plugins>
-      <!-- Deploy the artifacts to a tmp staging repository before uploading to the Github repo. -->
-      <plugin>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <version>2.8.2</version>
-        <configuration>
-          <altDeploymentRepository>
-            repo::default::file://${project.build.localRepo}
-          </altDeploymentRepository>
-        </configuration>
-      </plugin>
-
-      <!-- Upload the artifacts to the Github repository. -->
-      <plugin>
-        <groupId>com.github.github</groupId>
-        <artifactId>site-maven-plugin</artifactId>
-        <version>0.11</version>
-        <configuration>
-          <branch>${github.site.branch}</branch>
-          <outputDirectory>${project.build.localRepo}</outputDirectory>
-          <message>${github.site.message}</message>
-          <noJekyll>true</noJekyll>
-        </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>site</goal>
-            </goals>
-            <phase>deploy</phase>
-          </execution>
-        </executions>
-      </plugin>
-
-      <!-- Configure the assembly plugin to create an executable jar-file with
-      all dependencies -->
+      <!-- Configure the assembly plugin to create an executable jar-file with all dependencies -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
