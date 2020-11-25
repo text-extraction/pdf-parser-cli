@@ -23,11 +23,11 @@
       <url>https://github.com/text-extraction/common/raw/mvn-repo/</url>
     </repository>
     <repository>
-      <id>common</id>
+      <id>pdf-parser</id>
       <url>https://github.com/text-extraction/pdf-parser/raw/mvn-repo/</url>
     </repository>
     <repository>
-      <id>common</id>
+      <id>doc-serializer</id>
       <url>https://github.com/text-extraction/doc-serializer/raw/mvn-repo/</url>
     </repository>
   </repositories>
