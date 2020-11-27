@@ -8,8 +8,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
 import net.sourceforge.argparse4j.ArgumentParserBuilder;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.annotation.Arg;
@@ -25,18 +27,18 @@ import textextraction.serializer.JsonSerializer;
 import textextraction.serializer.Serializer;
 import textextraction.serializer.XmlSerializer;
 import textextraction.serializer.exception.SerializerException;
-import textextraction.serializer.exception.model.SerializationFormat;
+import textextraction.serializer.model.SerializationFormat;
 
 /**
  * The main class to run the PDF parser from the command line.
  * 
  * @author Claudius Korzen
  */
-public class PdfParserCLI {
+public class PdfParserCli {
   /**
    * The logger.
    */
-  protected static final Logger LOG = LogManager.getFormatterLogger(PdfParserCLI.class);
+  protected static final Logger LOG = LogManager.getFormatterLogger(PdfParserCli.class);
 
   /**
    * The path to the PDF file to process.
@@ -95,7 +97,7 @@ public class PdfParserCLI {
    */
   protected void parseCommandLineArguments(String[] args) {
     // Build the argument parser.
-    ArgumentParserBuilder builder = ArgumentParsers.newFor(PdfParserCLI.class.getSimpleName());
+    ArgumentParserBuilder builder = ArgumentParsers.newFor(PdfParserCli.class.getSimpleName());
     builder.terminalWidthDetection(false);
     builder.defaultFormatWidth(100);
 
@@ -219,7 +221,7 @@ public class PdfParserCLI {
    * @param args The command line arguments.
    */
   public static void main(String[] args) {
-    new PdfParserCLI().run(args);
+    new PdfParserCli().run(args);
   }
 }
 
