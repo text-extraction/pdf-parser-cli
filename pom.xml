@@ -51,16 +51,6 @@
       <version>0.1</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-api</artifactId>
-      <version>2.13.3</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-core</artifactId>
-      <version>2.13.3</version>
-    </dependency>
-    <dependency>
       <groupId>net.sourceforge.argparse4j</groupId>
       <artifactId>argparse4j</artifactId>
       <version>0.8.1</version>
@@ -85,11 +75,22 @@
         </executions>
       </plugin>
 
-      <!-- Configure the assembly plugin to create an executable jar-file with all dependencies -->
+      <!-- Configure the assembly plugin for creating an executable jar with all dependencies. -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
         <version>3.3.0</version>
+        <configuration>
+          <archive>
+            <manifest><mainClass>textextraction.PdfParserCli</mainClass></manifest>
+            <manifestEntries><Multi-Release>true</Multi-Release></manifestEntries>
+          </archive>
+          <descriptorRefs><descriptorRef>jar-with-dependencies</descriptorRef></descriptorRefs>
+          <outputDirectory>./bin</outputDirectory>
+          <finalName>${project.name}</finalName>
+          <appendAssemblyId>false</appendAssemblyId>
+          <attach>false</attach>
+        </configuration>
         <executions>
           <execution>
             <id>build-cli</id>
@@ -97,23 +98,6 @@
             <goals>
               <goal>single</goal>
             </goals>
-            <configuration>
-              <archive>
-                <manifest>
-                  <mainClass>textextraction.PdfParserCLI</mainClass>
-                </manifest>
-                <manifestEntries>
-                  <Multi-Release>true</Multi-Release>
-                </manifestEntries>
-              </archive>
-              <descriptorRefs>
-                <descriptorRef>jar-with-dependencies</descriptorRef>
-              </descriptorRefs>
-              <outputDirectory>./bin</outputDirectory>
-              <finalName>${project.name}</finalName>
-              <appendAssemblyId>false</appendAssemblyId>
-              <attach>false</attach>
-            </configuration>
           </execution>
         </executions>
       </plugin>
