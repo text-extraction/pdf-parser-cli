@@ -23,9 +23,7 @@ import textextraction.common.models.ElementClass;
 import textextraction.pdfparser.PdfParser;
 import textextraction.pdfparser.exception.PdfParserException;
 import textextraction.pdfparser.model.PdfDocument;
-import textextraction.serializer.JsonSerializer;
-import textextraction.serializer.Serializer;
-import textextraction.serializer.XmlSerializer;
+import textextraction.serializer.DocumentSerializer;
 import textextraction.serializer.exception.SerializerException;
 import textextraction.serializer.model.SerializationFormat;
 
@@ -182,20 +180,8 @@ public class PdfParserCli {
    */
   protected void serializePdf(PdfDocument pdf, Path outputFile, SerializationFormat format,
           Set<ElementClass> clazzes) throws SerializerException {
-    // Choose the correct serializer.
-    Serializer serializer;
-    switch (format) {
-      case XML:
-        serializer = new XmlSerializer();
-        break;
-      case JSON:
-      default:
-        serializer = new JsonSerializer();
-        break;
-    }
-
     // Serialize the PDF document.
-    byte[] serialization = serializer.serialize(pdf, clazzes);
+    byte[] serialization = new DocumentSerializer().serialize(pdf, format, clazzes);
 
     // Write the serialized PDF document to file (or stdout).
     if (outputFile != null) {
