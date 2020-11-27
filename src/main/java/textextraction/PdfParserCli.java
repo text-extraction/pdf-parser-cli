@@ -26,6 +26,8 @@ import textextraction.pdfparser.model.PdfDocument;
 import textextraction.serializer.DocumentSerializer;
 import textextraction.serializer.exception.SerializerException;
 import textextraction.serializer.model.SerializationFormat;
+import textextraction.visualizer.DocumentVisualizer;
+import textextraction.visualizer.exception.VisualizerException;
 
 /**
  * The main class to run the PDF parser from the command line.
@@ -196,6 +198,28 @@ public class PdfParserCli {
       } catch (IOException e) {
         throw new SerializerException("Couldn't write the serialization to stdout.", e);
       }
+    }
+  }
+
+  /**
+   * Visualizes the elements of the given PDF file to the given output file.
+   * 
+   * @param pdf        The PDF document to visualize.
+   * @param outputFile The file to write the visualization to.
+   * @param clazzes    The types of elements to visualize.
+   * 
+   * @throws VisualizerException If something went wrong on visualizing the PDF document.
+   */
+  protected void visualizePdf(PdfDocument pdf, Path outputFile, Set<ElementClass> clazzes)
+          throws VisualizerException {
+    // Visualize the PDF document.
+    byte[] visualization = new DocumentVisualizer().visualize(pdf, clazzes);
+
+    // Write the visualization to file.
+    try (OutputStream os = Files.newOutputStream(outputFile)) {
+      os.write(visualization);
+    } catch (IOException e) {
+      throw new VisualizerException("Couldn't write the visualization to file.", e);
     }
   }
 

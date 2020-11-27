@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>textextraction</groupId>
@@ -32,6 +33,10 @@
       <id>doc-serializer</id>
       <url>https://github.com/text-extraction/doc-serializer/raw/mvn-repo/</url>
     </repository>
+    <repository>
+      <id>doc-visualizer</id>
+      <url>https://github.com/text-extraction/doc-visualizer/raw/mvn-repo/</url>
+    </repository>
   </repositories>
 
   <dependencies>
@@ -48,6 +53,11 @@
     <dependency>
       <groupId>textextraction</groupId>
       <artifactId>doc-serializer</artifactId>
+      <version>0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>textextraction</groupId>
+      <artifactId>doc-visualizer</artifactId>
       <version>0.1</version>
     </dependency>
     <dependency>
@@ -82,10 +92,16 @@
         <version>3.3.0</version>
         <configuration>
           <archive>
-            <manifest><mainClass>textextraction.PdfParserCli</mainClass></manifest>
-            <manifestEntries><Multi-Release>true</Multi-Release></manifestEntries>
+            <manifest>
+              <mainClass>textextraction.PdfParserCli</mainClass>
+            </manifest>
+            <manifestEntries>
+              <Multi-Release>true</Multi-Release>
+            </manifestEntries>
           </archive>
-          <descriptorRefs><descriptorRef>jar-with-dependencies</descriptorRef></descriptorRefs>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
           <outputDirectory>./bin</outputDirectory>
           <finalName>${project.name}</finalName>
           <appendAssemblyId>false</appendAssemblyId>
