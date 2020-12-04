@@ -6,8 +6,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,25 +44,33 @@ public class PdfParserCli {
    * The path to the PDF file to process.
    */
   @Arg(dest = "inputFile")
-  protected String inputFile;
+  protected String inputFileStr;
 
   /**
-   * The path to the output file (if set to null, the output is written to stdout).
+   * The path to the file to which the content of the PDF document should be serialized (if set to
+   * null, the output is written to stdout).
    */
-  @Arg(dest = "outputFile")
-  protected String outputFile = null;
+  @Arg(dest = "serialTargetFile")
+  protected String serialFileStr = null;
 
   /**
-   * The output format (e.g., xml or json).
+   * The serialization format (e.g., xml or json).
    */
-  @Arg(dest = "outputFormat")
-  protected String outputFormat = "json";
+  @Arg(dest = "serialFormat")
+  protected String serialFormatStr = "json";
 
   /**
-   * The element types to extract.
+   * The path to the file to which a visualization of the content elements extracted from the PDF
+   * document should be written.
    */
-  @Arg(dest = "elementTypes")
-  protected List<String> elementClazzes = new ArrayList<>(ElementClass.getNames());
+  @Arg(dest = "visualTargetFile")
+  protected String visualFileStr = null;
+
+  /**
+   * The element classes to extract.
+   */
+  @Arg(dest = "elementClasses")
+  protected List<String> elementClassStrs = new ArrayList<>(ElementClass.getNames());
 
   // ==============================================================================================
 
@@ -75,18 +83,22 @@ public class PdfParserCli {
     // Parse the command line arguments.
     parseCommandLineArguments(args);
 
-    Path inputFile = Paths.get(this.inputFile);
-    Path outputFile = this.outputFile != null ? Paths.get(this.outputFile) : null;
-    SerializationFormat outputFormat = SerializationFormat.fromString(this.outputFormat);
-    Set<ElementClass> elementClazzes = ElementClass.fromStrings(this.elementClazzes);
+    // Translate the arguments (given as strings) to the respective objects.
+    Path inputFile = Paths.get(this.inputFileStr);
+    Path serialFile = this.serialFileStr != null ? Paths.get(this.serialFileStr) : null;
+    Path visualFile = this.visualFileStr != null ? Paths.get(this.visualFileStr) : null;
+    SerializationFormat serialFormat = SerializationFormat.fromString(this.serialFormatStr);
+    Collection<ElementClass> elementClasses = ElementClass.fromStrings(this.elementClassStrs);
 
     try {
       // Parse the PDF.
       PdfDocument pdf = parsePdf(inputFile);
       // Serialize the PDF.
-      serializePdf(pdf, outputFile, outputFormat, elementClazzes);
-    } catch (PdfParserException | SerializerException e) {
-      LOG.error("An error occurred on parsing '{}'.", inputFile, e);
+      serializePdf(pdf, serialFile, serialFormat, elementClasses);
+      // Visualize the PDF.
+      visualizePdf(pdf, visualFile, elementClasses);
+    } catch (PdfParserException | SerializerException | VisualizerException e) {
+      LOG.error("An error occurred on processing '{}'.", inputFile, e);
     }
   }
 
@@ -112,32 +124,41 @@ public class PdfParserCli {
     arg.required(true);
     arg.metavar("<pdf>");
 
-    // Add an argument to define the output file.
+    // Add an argument to define the serialization target file.
     arg = parser.addArgument("outputFile");
     arg.help("The output file. If not specified, the output will be written to stdout.");
-    arg.dest("outputFile");
+    arg.dest("serialTargetFile");
     arg.nargs("?");
-    arg.setDefault(outputFile);
+    arg.setDefault(serialFileStr);
     arg.metavar("<output>");
 
-    // Add an argument to define the output format.
+    // Add an argument to define the serialization format.
     String choicesStr = "[" + String.join(", ", SerializationFormat.getNames()) + "]";
     arg = parser.addArgument("-f", "--format");
     arg.help("The output format. Choose from: " + choicesStr + ".");
     arg.dest("outputFormat");
     arg.nargs("?");
     arg.choices(SerializationFormat.getNames());
-    arg.setDefault(outputFormat);
+    arg.setDefault(serialFormatStr);
     arg.metavar("<format>");
 
-    // Add an argument to define the types of elements to extract.
+    // Add an argument to define the visualization target file.
+    arg = parser.addArgument("-v", "--visualization");
+    arg.help("The path to a file to which a visualization of the extracted content elements should "
+            + "be written. If not specified, no visualization will be created.");
+    arg.dest("visualTargetFile");
+    arg.nargs("?");
+    arg.setDefault(visualFileStr);
+    arg.metavar("<visualization>");
+
+    // Add an argument to define the types of elements to serialize and to visualize.
     choicesStr = "[" + String.join(", ", ElementClass.getNames()) + "]";
     arg = parser.addArgument("-t", "--type");
     arg.help("The types of the elements to extract. Choose from: " + choicesStr + ".");
-    arg.dest("elementTypes");
+    arg.dest("elementClasses");
     arg.nargs("*");
     arg.choices(ElementClass.getNames());
-    arg.setDefault(elementClazzes);
+    arg.setDefault(elementClassStrs);
     arg.metavar("<type>", "<type>");
 
     try {
@@ -176,14 +197,14 @@ public class PdfParserCli {
    * @param pdf        The PDF document to serialize.
    * @param outputFile The file to write the serialization to.
    * @param format     The serialization format.
-   * @param clazzes    The types of elements to serialize.
+   * @param classes    The types of elements to serialize.
    * 
    * @throws PdfParserException If something went wrong on serializing the PDF document.
    */
   protected void serializePdf(PdfDocument pdf, Path outputFile, SerializationFormat format,
-          Set<ElementClass> clazzes) throws SerializerException {
+          Collection<ElementClass> classes) throws SerializerException {
     // Serialize the PDF document.
-    byte[] serialization = new DocumentSerializer().serialize(pdf, format, clazzes);
+    byte[] serialization = new DocumentSerializer().serialize(pdf, format, classes);
 
     // Write the serialized PDF document to file (or stdout).
     if (outputFile != null) {
@@ -206,14 +227,14 @@ public class PdfParserCli {
    * 
    * @param pdf        The PDF document to visualize.
    * @param outputFile The file to write the visualization to.
-   * @param clazzes    The types of elements to visualize.
+   * @param classes    The types of elements to visualize.
    * 
    * @throws VisualizerException If something went wrong on visualizing the PDF document.
    */
-  protected void visualizePdf(PdfDocument pdf, Path outputFile, Set<ElementClass> clazzes)
+  protected void visualizePdf(PdfDocument pdf, Path outputFile, Collection<ElementClass> classes)
           throws VisualizerException {
     // Visualize the PDF document.
-    byte[] visualization = new DocumentVisualizer().visualize(pdf, clazzes);
+    byte[] visualization = new DocumentVisualizer().visualize(pdf, classes);
 
     // Write the visualization to file.
     try (OutputStream os = Files.newOutputStream(outputFile)) {
